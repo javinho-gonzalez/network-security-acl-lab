@@ -1,0 +1,105 @@
+! =====================================
+! Network Topology & ACL Configuration
+! =====================================
+
+Device	     Interface      IP Address
+R1	     G0/0	    192.168.10.1
+	     G0/1	    192.168.11.1
+	     S0/0/0	    10.1.1.1
+	     S0/0/1	    10.3.3.1
+R2	     G0/0	    192.168.20.1
+	     S0/0/0	    10.1.1.2
+	     S0/0/1	    10.2.2.1
+R3	     G0/0	    192.168.30.1
+	     S0/0/0	    10.3.3.2
+	     S0/0/1	    10.2.2.2
+PC1	     NIC	    192.168.10.10
+PC2	     NIC	    192.168.11.10
+PC3	     NIC	    192.168.30.10
+Web Server   NIC            192.168.20.254
+
+
+! ===============================
+! R2 - ACL Configuration
+! ===============================
+! Objective: Block 192.168.11.0/24 from accessing Web Server (192.168.20.254)
+
+
+access-list 1 deny 192.168.11.0 0.0.0.255
+access-list 1 permit any
+
+interface GigabitEthernet0/0
+ip access-group 1 out
+
+
+! ===============================
+! R3 - ACL Configuration
+! ===============================
+! Objective: Block 192.168.10.0/24 from accessing 192.168.30.0/24
+
+
+access-list 1 deny 192.168.10.0 0.0.0.255
+access-list 1 permit any
+
+interface GigabitEthernet0/0
+ip access-group 1 out
+
+! ====================================
+! R2 - ACL Verification 
+! ====================================
+
+R2>enable
+R2# show access-lists
+Standard IP access list 1
+10 deny 192.168.11.0 0.0.0.255 (4 match(es))
+20 permit any (8 match(es))
+
+! =============================================
+! Testing from PC2 (192.168.11.10) to server:
+! =============================================
+
+C:\>ping 192.168.20.254
+Pinging 192.168.20.254 with 32 bytes of data:
+
+Reply from 10.1.1.2: Destination host unreachable.
+Reply from 10.1.1.2: Destination host unreachable.
+Reply from 10.1.1.2: Destination host unreachable.
+Reply from 10.1.1.2: Destination host unreachable.
+
+Ping statistics for 192.168.20.254:
+Packets: Sent = 4, Received = 0, Lost = 4 (100% loss),
+
+
+! =====================================
+! R3 - ACL Verification
+! =====================================
+
+R3>enable
+R3# show access-lists
+Standard IP access list 1
+10 deny 192.168.10.0 0.0.0.255 (4 match(es))
+20 permit any (4 match(es))
+
+! =========================================
+! Testing from PC1 (192.168.10.10) to PC3:
+! =========================================
+
+C:\>ping 192.168.30.10
+Pinging 192.168.30.10 with 32 bytes of data:
+
+Reply from 10.3.3.2: Destination host unreachable.
+Reply from 10.3.3.2: Destination host unreachable.
+Reply from 10.3.3.2: Destination host unreachable.
+Reply from 10.3.3.2: Destination host unreachable.
+
+Ping statistics for 192.168.30.10:
+Packets: Sent = 4, Received = 0, Lost = 4 (100% loss),
+
+! =================================
+! Result
+! =================================
+! ACLs successfully restricted traffic according to defined policies
+! Unauthorized access attempts were blocked, while permitted traffic was allowed.
+
+
+

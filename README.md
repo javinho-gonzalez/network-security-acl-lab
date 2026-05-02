@@ -1,6 +1,6 @@
 **Network Security Lab – ACL Implementation (Cisco Packet Tracer)**
 
-
+Beginner network security project demonstrating practical ACL implementation and traffic filtering
 
 **Objective**
 
@@ -76,3 +76,5 @@ In this lab, multiple networks were configured and connected through routers usi
 •Importance of testing before applying rules
 
 •How misconfigured ACLs can block legitimate traffic
+
+•How to validate configurations using logs and connectivity tests
